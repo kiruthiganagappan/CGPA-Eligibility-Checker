@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CGPA & Placement Eligibility Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <div class="brand">
+        <span class="brand-mark">CG</span>
+        <span class="brand-text">CGPA<em>Ledger</em></span>
+      </div>
+      <nav class="nav-links">
+        <button class="nav-btn active" data-page="home">Home</button>
+        <button class="nav-btn" data-page="calculator">CGPA Calculator</button>
+        <button class="nav-btn" data-page="eligibility">Eligibility Checker</button>
+        <button class="nav-btn" data-page="dashboard">Dashboard</button>
+        <button id="adminNavBtn" class="nav-btn" data-page="admin">Admin</button>
+      </nav>
+      <div class="nav-user">
+        <span id="userChip" class="user-chip hidden"></span>
+        <button id="logoutBtn" class="btn ghost small hidden">Logout</button>
+      </div>
+      <button id="themeToggle" class="theme-toggle" title="Toggle dark mode">🌙</button>
+    </div>
+  </header>
+
+  <!-- ===== LOGIN GATE — shown first, blocks everything until login ===== -->
+  <div id="loginOverlay" class="login-overlay hidden">
+    <div class="login-box">
+      <span class="brand-mark login-mark">CG</span>
+      <h2>Login to continue</h2>
+      <p class="page-sub">Choose how you'd like to login.</p>
+
+      <div class="login-tabs">
+        <button type="button" id="userTabBtn" class="login-tab active">User Login</button>
+        <button type="button" id="adminTabBtn" class="login-tab">Admin Login</button>
+      </div>
+
+      <!-- USER LOGIN PANEL -->
+      <div id="userLoginPanel">
+        <label for="loginEmail">Email address</label>
+        <input type="email" id="loginEmail" placeholder="you@college.edu">
+        <p id="loginError" class="login-error hidden">Please enter a valid email address.</p>
+        <div class="panel-actions">
+          <button id="loginSubmitBtn" class="btn primary" style="width:100%; justify-content:center;">Login</button>
+        </div>
+      </div>
+
+      <!-- ADMIN LOGIN PANEL -->
+      <div id="adminLoginPanel" class="hidden">
+        <label for="gateAdminId">Admin ID</label>
+        <input type="text" id="gateAdminId" placeholder="admin">
+        <label for="gateAdminPass" style="margin-top:14px;">Password</label>
+        <input type="password" id="gateAdminPass" placeholder="••••••••">
+        <p id="gateAdminError" class="login-error hidden">Incorrect admin ID or password.</p>
+        <div class="panel-actions">
+          <button id="gateAdminLoginBtn" class="btn primary" style="width:100%; justify-content:center;">Login as Admin</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- ===== HOME PAGE ===== -->
+    <section id="home" class="page active">
+      <div class="hero">
+        <p class="eyebrow">Academic Record · Career Readiness</p>
+        <h1>Know your CGPA.<br>Know your chances.</h1>
+        <p class="hero-sub">A single ledger for your semester grades and the placement drives you qualify for &mdash; calculated instantly, right in your browser.</p>
+        <div class="hero-actions">
+          <button class="btn primary" data-goto="calculator">Calculate my CGPA</button>
+          <button class="btn ghost" data-goto="eligibility">Check eligibility</button>
+        </div>
+        <div class="stat-strip">
+          <div class="stat-chip"><strong>8</strong><span>Semesters supported</span></div>
+          <div class="stat-chip"><strong>4</strong><span>Companies tracked</span></div>
+          <div class="stat-chip"><strong>3</strong><span>Metrics, one view</span></div>
+        </div>
+      </div>
+
+      <div class="overview">
+        <h2>What this tool does</h2>
+        <div class="overview-grid">
+          <div class="overview-card">
+            <span class="ov-index">01</span>
+            <h3>CGPA Calculator</h3>
+            <p>Enter GPA for each completed semester and get your overall CGPA, percentage equivalent, and performance level.</p>
+          </div>
+          <div class="overview-card">
+            <span class="ov-index">02</span>
+            <h3>Eligibility Checker</h3>
+            <p>Enter your CGPA and arrear count to see which companies you qualify for, with a clear reason when you don't.</p>
+          </div>
+          <div class="overview-card">
+            <span class="ov-index">03</span>
+            <h3>Dashboard</h3>
+            <p>A single summary card view of your CGPA, percentage, eligible company count and overall standing.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CGPA CALCULATOR PAGE ===== -->
+    <section id="calculator" class="page">
+      <h1 class="page-title">CGPA Calculator</h1>
+      <p class="page-sub">Choose how many semesters you've completed, enter each GPA (0&ndash;10), and calculate.</p>
+
+      <div class="panel">
+        <label for="semCount">Semesters completed</label>
+        <select id="semCount">
+          <option value="">Select</option>
+          <!-- Options 1-8 are injected by script.js -->
+        </select>
+
+        <div id="gpaInputs" class="gpa-grid"></div>
+
+        <div class="panel-actions">
+          <button id="calcBtn" class="btn primary" disabled>Calculate CGPA</button>
+          <button id="resetCalc" class="btn ghost">Reset</button>
+        </div>
+      </div>
+
+      <div id="calcResult" class="result-block hidden">
+        <div class="result-cards">
+          <div class="result-card">
+            <span class="rc-label">Overall CGPA</span>
+            <span id="rCgpa" class="rc-value mono">--</span>
+          </div>
+          <div class="result-card">
+            <span class="rc-label">Percentage Equivalent</span>
+            <span id="rPercent" class="rc-value mono">--</span>
+          </div>
+          <div class="result-card">
+            <span class="rc-label">Performance Level</span>
+            <span id="rLevel" class="rc-value badge">--</span>
+          </div>
+        </div>
+        <p class="formula-note">Percentage is estimated using the common engineering-college formula: (CGPA &minus; 0.75) &times; 10</p>
+      </div>
+    </section>
+
+    <!-- ===== ELIGIBILITY CHECKER PAGE ===== -->
+    <section id="eligibility" class="page">
+      <h1 class="page-title">Placement Eligibility Checker</h1>
+      <p class="page-sub">Enter your CGPA and current arrear count to see which companies are open to you.</p>
+
+      <div class="panel">
+        <div class="field-row">
+          <div class="field">
+            <label for="eCgpa">CGPA</label>
+            <input type="number" id="eCgpa" min="0" max="10" step="0.01" placeholder="e.g. 8.10">
+          </div>
+          <div class="field">
+            <label for="eArrears">Number of arrears</label>
+            <input type="number" id="eArrears" min="0" step="1" placeholder="e.g. 0">
+          </div>
+        </div>
+        <div class="panel-actions">
+          <button id="checkBtn" class="btn primary">Check Eligibility</button>
+          <button id="resetElig" class="btn ghost">Reset</button>
+        </div>
+      </div>
+
+      <div id="eligResult" class="stamp-grid hidden"></div>
+    </section>
+
+    <!-- ===== DASHBOARD PAGE ===== -->
+    <section id="dashboard" class="page">
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-sub">A running summary of your latest CGPA calculation and eligibility check.</p>
+
+      <div class="dash-grid">
+        <div class="dash-card">
+          <span class="dash-label">CGPA</span>
+          <span id="dCgpa" class="dash-value mono">--</span>
+        </div>
+        <div class="dash-card">
+          <span class="dash-label">Percentage</span>
+          <span id="dPercent" class="dash-value mono">--</span>
+        </div>
+        <div class="dash-card">
+          <span class="dash-label">Eligible Companies</span>
+          <span id="dEligible" class="dash-value mono">--</span>
+        </div>
+        <div class="dash-card wide">
+          <span class="dash-label">Performance Summary</span>
+          <p id="dSummary" class="dash-summary">Run the CGPA Calculator and Eligibility Checker to populate your dashboard.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ADMIN PAGE ===== -->
+    <section id="admin" class="page">
+      <h1 class="page-title">Admin</h1>
+      <p class="page-sub">Every user's CGPA and eligible companies, saved to this browser's local storage.</p>
+
+      <!-- Shown until the admin ID + password below is entered correctly -->
+      <div id="adminLoginBox" class="admin-login-box">
+        <span class="admin-restricted-mark">🔒</span>
+        <h3>Admin Login</h3>
+        <p class="page-sub" style="margin-bottom:16px;">Enter the admin ID and password to view saved user data.</p>
+
+        <label for="adminIdInput">Admin ID</label>
+        <input type="text" id="adminIdInput" placeholder="admin">
+        <label for="adminPassInput" style="margin-top:14px;">Password</label>
+        <input type="password" id="adminPassInput" placeholder="••••••••">
+
+        <p id="adminLoginError" class="login-error hidden">Incorrect admin ID or password.</p>
+
+        <div class="panel-actions">
+          <button id="adminLoginBtn" class="btn primary" style="width:100%; justify-content:center;">Login as Admin</button>
+        </div>
+      </div>
+
+      <div id="adminContent" class="hidden">
+        <div class="panel">
+          <div class="panel-actions" style="margin-top:0;">
+            <button id="clearUsersBtn" class="btn ghost">Clear all saved users</button>
+            <button id="adminLogoutBtn" class="btn ghost">Admin Logout</button>
+          </div>
+        </div>
+
+        <div id="adminEmpty" class="admin-empty hidden">No users have logged in yet.</div>
+
+        <table id="adminTable" class="admin-table hidden">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Email</th>
+              <th>CGPA</th>
+              <th>Eligible Companies</th>
+              <th>First login</th>
+              <th>Last login</th>
+              <th>Logins</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>CGPA &amp; Placement Eligibility Predictor &mdash; built with HTML, CSS &amp; JavaScript only. No data leaves your browser.</p>
+  </footer>
+
+<script src="script.js"></script>
+</body>
+</html>
